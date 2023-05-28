@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Page Title</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+</head>
+<body>
+  
+  <div style="height:60vh; width:100vw">
+    <canvas id="myChart"></canvas>
+  </div>
+
+  <div style="padding: 1rem">
+  <button id="toggleButton">Show Y-2 Axis</button>
+
+  <button id="addButton">Add tooltip</button>
+
+  <button id="removeButton">Remove tooltip</button>
+  </div>
+
+    <script>
+
+      var chart ;
+      var data1= [101550.48, 141376.78, 152397.33, 173977.18, 19688.03];
+      var data2= [56830.03, 78222.29, 91738.62, 109036.09, 13172.4];
+      var data3= [67713.66, 102924.51, 106356.98, 122111.53, 13506.76];
+      var data4= [8354, 10053, 10994, 12023, 1501];
+      var data5= [12637, 12766, 13677, 14234, 1703];
+
+      function myChatJS(){
+        const ctx = document.getElementById('myChart').getContext("2d");
+           chart = new Chart(ctx, {
+            data: {
+              labels: ["Jan 23", "Feb 23", "Mar 23", "Apr 23", "May 23"],
+              datasets: [{
+                          type: 'bar',
+                          label: 'Sales',
+                          data: data1,
+                          fill: false,
+                          tension: 0.1,
+                          yAxisID: 'y',
+                        },
+                        {
+                          type: 'bar',
+                          label: 'Expenses',
+                          data: data2,
+                          fill: false,
+                          tension: 0.1,
+                          yAxisID: 'y',
+                        },
+                        {
+                          type: 'bar',
+                          label: 'Profit',
+                          data: data3,
+                          fill: false,
+                          tension: 0.1,
+                          yAxisID: 'y',
+                        },
+                        {
+                          type: 'line',
+                          label: 'Orders',
+                          data: data4,
+                          fill: false,
+                          tension: 0.1,
+                          yAxisID: 'y1',
+                        },
+                        {
+                          type: 'line',
+                          label: 'Units',
+                          data: data5,
+                          fill: false,
+                          tension: 0.1,
+                          yAxisID: 'y1',
+                        }      
+                      ],     
+                  },
+  
+        options: {
+            responsive: true,
+            interaction: {
+              mode: 'index',
+              intersect: false,
+            },
+            stacked: false,
+            
+            plugins: {
+              tooltip: {
+              callbacks: {
+                label(tooltipItems, label) {
+                  const dataset = chart.data.datasets[tooltipItems.datasetIndex];
+                  const value = dataset.data[tooltipItems.dataIndex];
+                  let formattedValue = '';
+
+                  if (tooltipItems.datasetIndex < 3) {
+                    formattedValue = `€ ${value}`;
+                  } 
+                  else {
+                    formattedValue = value;
+                  }
+
+                  return `${dataset.label} : ${formattedValue}`;
+                },
+        }
+      },
+                legend: {
+                        display: true,
+                        position: 'bottom',
+
+                              labels: {
+                                // filter: (l) => (l.text !== 'Units'),
+
+                                usePointStyle: true,
+                                color: 'rgb(255, 99, 132)'
+                                      }
+                        },
+    },
+            scales: {
+              x: {
+                ticks:{
+                    autoSkip: true,
+                    maxTicksLimit: 3,
+                      },      
+                  },
+              y: {
+                display:true,
+                position: 'left',
+                max: 180000,
+                min: 0,
+                id: 'y-axis-1',
+                  
+                scaleLabel: {
+                              display: false,
+                            },
+                grid:       {
+                              display: false,
+                            },
+                ticks: {
+                  stepSize: 45000,
+                    callback: function(value, index, ticks) {
+                            return '$' + value;                   
+                            }
+                    }
+                },
+                y1:{
+                  display: false,
+                  position: 'right',
+                  max: 180000,
+                  min: 0,
+                  id: 'y-axis-2',
+                  grid: {
+                      drawOnChartArea: false
+                    },
+
+                  ticks: {
+                            stepSize: 30000,
+                              callback: function(value, index, ticks) {
+                                      return '€' + value;                   
+                                      }
+                              },
+        grid: {
+          drawOnChartArea: false, 
+        },
+                }    
+             }
+          }
+      }
+    )
+      }
+
+      
+
+      $( document ).ready(function() {
+        myChatJS();
+});
+      
+      $("#toggleButton").one("click", function() {
+      const toggleButton = document.getElementById('toggleButton');
+
+      // data5= [8354, 10053, 10994, 12023, 1501];
+      // data4= [12637, 12766, 13677, 14234, 1703];
+      // data.datasets[0].data = data4;
+      // data.datasets[1].data = data5;
+
+      chart.options.scales.y1.display =! chart.options.scales.y1.display;
+
+      var data = chart.data;
+      chart.update();
+
+      // document.getElementById("toggleButton").disabled = true;
+});
+
+      $("#addButton").one("click", function() {
+              const toggleButton = document.getElementById('addButton');
+              var data = chart.data;
+
+              data.datasets.push(
+              {
+              type: 'bar',
+              label: 'New Data 1',
+              data: data1,
+              fill: false,
+              tension: 0.1,
+              yAxisID: 'y',
+              }
+            )
+            chart.update();
+      });
+
+      $('#removeButton').click(function(){
+        const toggleButton = document.getElementById('removeButton');
+        var data = chart.data;
+
+        data.datasets.pop()
+
+        chart.update();
+      });
+
+    </script>
+
+</body>
+</html>
