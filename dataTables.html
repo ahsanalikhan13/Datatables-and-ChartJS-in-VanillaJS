@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="styles.css">
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+        <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous"> -->
+
+        <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script> -->
+        
+        <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js"></script>
+
+        <script src="https://cdn.datatables.net/plug-ins/9dcbecd42ad/integration/jqueryui/dataTables.jqueryui.js"></script>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <!-- <script src="//cdn.datatables.net/plug-ins/1.13.4/api/rows().generate().js"></script> -->      
+    </head>
+
+<body>
+
+    <script>
+        var row_index;
+        var ctx;
+        var chart ;
+        var obj={};
+        var idChart;
+        var chartId;
+        
+        $(document).ready(function() {
+
+          document.getElementById("table2function").disabled = true;
+            var myTable = $('#table_id');
+            var t = myTable.dataTable({
+              pagingType: 'numbers',
+              "bInfo": false,
+              "paginate" : true,
+              processing: true,
+              serverSide: true,
+                "order":[],
+                "ajax": {
+                    url:'https://preview.keenthemes.com/api/datatables.php',
+                    type: 'POST'
+                },
+            "columns": [
+                {"data": 'Name'},
+                {"data": 'Email'},
+                {"data": 'Company'},
+                {"data": 'City'},
+                {"data": 'Country'},
+                {"data": 'Datetime'},
+            ],
+
+            columnDefs: [
+            {
+            // {className: 'w-150px', targets: [5]},
+            targets: -1,
+            render: function(data, type, row, meta) {
+              return '<button class="btn btn-primary" id="btn-reload" onclick="AddOrDelete(this)"><i class="fa fa-bars"></i> See Trend</button>';
+              },
+        }
+            ],
+
+            lengthMenu: [[25, 50, 100, -1], [25, 50, 100, "All"]],
+            ordering : true,
+            searching : true,
+            paging : true,
+            ordering: false,
+            info: true,
+            paginate: true,
+                   
+            // dom: 'Bfrtip',
+            // buttons: ['copy', 'csv', 'print']
+            // lengthChange: false,
+        });
+        $('#btn-reload').on('click', function(){
+          t.ajax.reload();
+          });
+});
+
+        function AddOrDelete(ele) {
+          var row_index = $(ele).closest('tr').index();
+
+          if ($('#table_id > tbody > tr').eq(row_index + 1).hasClass('new_' + row_index)) {
+              $('#table_id > tbody > tr').eq(row_index + 1).remove();
+
+          } else {
+
+            $('#table_id > tbody > tr').eq(row_index).after(
+                $('<tr></tr>').addClass('new_' + row_index).append($('<td colspan="6" background-color: "white" id="loader"></td>'))
+            );
+
+            var chartId = 'chart' + row_index;
+            var ctx;
+
+            function toggleSVGVisibility() {
+              
+              const svg = document.getElementById("loader");
+              const chartId = "chart" + row_index;
+              const ctx = document.getElementById(chartId).getContext("2d");
+
+              // if (svg.style.visibility === "visible") {
+              //   svg.style.visibility = "hidden";
+              //   ctx.canvas.style.visibility === "hidden";
+              // } 
+              // else {
+              //   svg.style.visibility = "hidden";
+              //   ctx.canvas.style.visibility = "visible";
+              // }
+              
+
+                // svg.style.visibility === "visible" ? "hidden" : "hidden";
+                // ctx.canvas.style.visibility = "visible";
+                // svg.style.visibility = svg.style.visibility === "visible" ? "hidden" : "hidden";
+              }
+              
+            setInterval(toggleSVGVisibility, 1000);
+
+
+            $('tr.new_' + row_index + ' td').html(`<canvas id="chart${row_index}" height= "80px"></canvas>`)
+
+              var ctx = document.getElementById(chartId).getContext("2d");
+
+              obj['chart' + row_index]= ctx;
+
+            //   if (obj.hasOwnProperty(chartId)) {
+            //   var chart = document.getElementById(obj[chartId]);
+            //       if (ctx) {
+            //         obj.ctx.destroy();
+            //       }
+            //       delete obj[chartId];
+            // }
+
+            var chart = new Chart(ctx, {
+              data: {
+              labels: ["Jan 23", "Feb 23", "Mar 23", "Apr 23", "May 23"],
+              datasets: [{
+                          type: 'bar',
+                          label: 'Sales',
+                          data: [101550.48, 141376.78, 152397.33, 173977.18, 19688.03],
+                          fill: false,
+                          tension: 0.1,
+                        },
+                        {
+                          type: 'bar',
+                          label: 'Expenses',
+                          data: [56830.03, 78222.29, 91738.62, 109036.09, 13172.4],
+                          fill: false,
+                          tension: 0.1,
+                        },
+                        {
+                          type: 'bar',
+                          label: 'Profit',
+                          data: [67713.66, 102924.51, 106356.98, 122111.53, 13506.76],
+                          fill: false,
+                          tension: 0.1,
+                        },
+                        {
+                          type: 'line',
+                          label: 'Orders',
+                          data: [8354, 10053, 10994, 12023, 1501],
+                          fill: false,
+                          tension: 0.1,
+                        },
+                        {
+                          type: 'line',
+                          label: 'Units',
+                          data: [12637, 12766, 13677, 14234, 1703],
+                          fill: false,
+                          tension: 0.1,
+                        }      
+                      ],     
+                  },
+  
+            options: {
+                responsive: true,
+                interaction: {
+                  mode: 'index',
+                  intersect: false,
+            },
+              stacked: false,
+            
+            plugins: {
+                tooltip: {
+                  callbacks: {
+                    label(tooltipItems, label) {
+                      return `${chart.data.datasets[tooltipItems.datasetIndex].label} : € ${tooltipItems.formattedValue} `
+                    }
+                }
+            },
+                legend: {
+                        display: true,
+                        position: 'bottom',
+                              labels: {
+                              usePointStyle: true,
+                              color: 'rgb(255, 99, 132)'
+                                      }
+                        },
+
+    },
+            scales: {
+              x: {
+                ticks:{
+                    autoSkip: true,
+                    maxTicksLimit: 3,
+                      },      
+                  },
+              y: {
+                display:false,
+                position: 'left',
+                max: 180000,
+                min: 0,
+                  
+                scaleLabel: {
+                              display: false,
+                            },
+                grid:       {
+                              display: false,
+                            },
+                ticks: {
+                  stepSize: 45000,
+                    callback: function(value, index, ticks) {
+                            return '$' + value;                   
+                            }
+                    }
+                }    
+             }
+          }
+        });
+      }
+    }
+        
+        function table2Function(){
+            $('#modal_table').modal('show');
+
+            var $myTable2 = $('#table_id2');
+            var t2 = $myTable2.dataTable({
+                paging: false,
+                searching: false,
+                // retrieve: true,
+                destroy: true,
+                "order":[],
+                "ajax": {
+                    url:'https://preview.keenthemes.com/api/datatables.php'
+                },
+            "columns": [
+                {"data": 'Name'},
+                {"data": 'Email'},
+                {"data": 'Company'},
+                {"data": 'City'},
+                {"data": 'Country'},
+                {"data": 'Datetime'}
+            ],
+
+            columnDefs: [
+            {className: 'w-150px', "visible": false, targets: [2,3,5],}
+            ],
+
+            lengthMenu: [[25, 50, 100, -1], [25, 50, 100, "All"]],
+            ordering : true,
+            info  : true,
+            searching : true,
+            pagingType: "numbers",
+            paging : true,
+            info: true,        
+            });
+        }
+
+        function reinitializeFunction(table_id){
+                var table = $('#table_id').DataTable({
+                paging : true,
+                "bDestroy": true,
+                stateSave: false,
+                // scrollY: 300,
+                "ajax": {
+                    url:'https://preview.keenthemes.com/api/datatables.php'
+                },
+                "columns": [
+                {"data": 'Name'},
+                {"data": 'Email'},
+                {"data": 'Company'},
+                {"data": 'City'},
+                {"data": 'Country'},
+                {"data": 'Datetime'}
+            ],
+            columnDefs: [
+            {className: 'w-150px', targets: [5]},
+            ],
+
+            lengthMenu: [[25, 50, 100, -1], [25, 50, 100, "All"]],
+            ordering : true,
+            info  : true,
+            searching : true,
+            pagingType: "numbers",
+            paging : true,
+            ordering: false,
+            info: true,            
+            });
+    }
+
+    </script>
+
+    <div>
+
+        <div style="border: 20px solid rgb(240, 240, 240); 
+        border-top-left-radius: 25px;
+        border-top-right-radius: 25px; 
+        border-bottom: none;">
+        <div id="header">
+        
+        <button type="button" class="btnTable2" id="table2function" onclick="table2Function()">2nd Table</button>
+
+        <button type="button" style="letter-spacing: 1px;" class="btn btn-primary" id="reinitFunction"  onclick="reinitializeFunction()"> Reinitialize Table</button>
+        </div>
+
+        <table id="table_id" >
+            <thead style="text-align: left;">
+                <tr style="height: 28px; position: relative;">
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Company</th>
+                    <th>City</th>
+                    <th>Country</th>
+                    <th>Date/Time</th>
+                </tr>
+            </thead>  
+            <tbody class="table_body">
+            </tbody>
+        </table>
+    </div>
+        
+        <!-- <div id="modal_table" width="80%" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content">
+            <table id="table_id2" width="100%">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Company</th>
+                    <th>City</th>
+                    <th>Country</th>
+                    <th>Date/Time</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+            </table>
+              </div>
+            </div>
+        </div> -->
+    </div>
+
+</body>
+</html>
